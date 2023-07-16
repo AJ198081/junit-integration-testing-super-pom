@@ -4,6 +4,7 @@ import dev.aj.app.model.CollegeStudent;
 import dev.aj.app.repository.CollegeStudentRepository;
 import java.util.List;
 import java.util.Optional;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -75,6 +76,7 @@ class StudentServiceTest {
 
         //Advantage of assertAll, compared to individual assertions, Runs all tests regardless of failure
         Assertions.assertAll("Test student objects saved to DB is same as was saved",
+                () -> org.hamcrest.MatcherAssert.assertThat(savedStudent.getId(), Matchers.greaterThan(0L)),
                 () -> Assertions.assertNotNull(savedStudent.getId(), () -> "Expected id of student saved to DB to be not null, but was"),
                 () -> Assertions.assertEquals(savedStudent.getFirstName(), collegeStudent.getFirstName(), () -> "Expected first name of student saved to the DB to be same as the one that was provided, but were different"),
                 () -> Assertions.assertEquals(savedStudent.getLastName(), collegeStudent.getLastName(), () -> "Expected Last name of student saved to the DB to be same as the one that was provided, but were different"),
@@ -101,7 +103,7 @@ class StudentServiceTest {
 
         List<CollegeStudent> collegeStudents = jdbcTemplate.query("select id, first_name, last_name, email from student", (rs, rowNum) -> {
             return CollegeStudent.builder()
-                    .id(rs.getInt(1))
+                    .id(rs.getLong(1))
                     .firstName(rs.getString(2))
                     .lastName(rs.getString(3))
                     .email(rs.getString(4))
@@ -115,9 +117,9 @@ class StudentServiceTest {
 
         jdbcTemplate.execute("insert into student(first_name, last_name, email) values ('DJ', 'B', 'djb@hotmail.com')");
 
-        studentDao.deleteById(3);
+        studentDao.deleteById(3L);
 
-        Optional<CollegeStudent> deletedStudent = studentDao.findById(3);
+        Optional<CollegeStudent> deletedStudent = studentDao.findById(3L);
 
         Assertions.assertFalse(deletedStudent.isPresent(), () -> "Deleted student shouldn't have been present, but was");
     }

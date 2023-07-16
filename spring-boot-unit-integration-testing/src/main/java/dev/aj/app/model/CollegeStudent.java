@@ -1,5 +1,7 @@
 package dev.aj.app.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,10 +26,13 @@ public class CollegeStudent implements Student {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
+//    @JsonProperty("first_name")
     private String firstName;
+
     private String lastName;
+
     private String email;
 
     @Override
