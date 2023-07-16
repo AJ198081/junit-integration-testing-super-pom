@@ -15,6 +15,12 @@
 
     <name>junit-integration-testing-super-pom</name>
     <description>testing-sandbox</description>
+    <modules>
+        <module>junit-test</module>
+        <module>spring-boot-tests</module>
+        <module>spring-boot-unit-integration-testing</module>
+        <module>tdd</module>
+    </modules>
 
     <packaging>pom</packaging>
 
