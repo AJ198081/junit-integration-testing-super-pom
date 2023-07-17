@@ -10,7 +10,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
@@ -32,6 +36,8 @@ import org.springframework.web.servlet.ModelAndView;
 @AutoConfigureMockMvc
 @SpringBootTest
 @TestPropertySource("/application.properties")
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class GradeBookControllerTest {
 
     public static final String EMAIL = "abg@hotmail.com";
@@ -81,9 +87,9 @@ class GradeBookControllerTest {
     }
 
     @Test
-    void getStudents() throws Exception {
+    void Get_Students() throws Exception {
 
-        Mockito.when(studentService.findAllStudents()).thenAnswer(this::fetchStudentsFromDB);
+        Mockito.when(studentService.getGradebook()).thenAnswer(this::fetchStudentsFromDB);
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/"))
                 .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
@@ -99,7 +105,7 @@ class GradeBookControllerTest {
 
     @Test
     @Disabled("Yet to be built")
-    void studentInformation() {
+    void Student_Information() {
 
     }
 
@@ -113,7 +119,7 @@ class GradeBookControllerTest {
     }
 
     @Test
-    public void createStudentHttpRequest() throws Exception {
+    public void Create_Student_Http_Request() throws Exception {
 
         Mockito.when(studentService.getGradebook()).thenReturn(List.of(collegeStudent));
 
@@ -145,7 +151,7 @@ class GradeBookControllerTest {
 
         CollegeStudent savedStudent = (CollegeStudent) modelObject.get("savedStudent");
 
-        org.junit.jupiter.api.Assertions.assertIterableEquals(List.of(collegeStudent), (List<CollegeStudent>) modelObject.get("gradeBook"));
+        org.junit.jupiter.api.Assertions.assertIterableEquals(List.of(collegeStudent), (List<CollegeStudent>) modelObject.get("students"));
 
         Assertions.assertThat(savedStudent.getId()).isGreaterThanOrEqualTo(1L);
 
