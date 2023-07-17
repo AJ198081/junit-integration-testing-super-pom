@@ -2,6 +2,7 @@ package dev.aj.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.aj.app.model.CollegeStudent;
+import dev.aj.app.repository.CollegeStudentRepository;
 import dev.aj.app.service.StudentService;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +62,9 @@ class GradeBookControllerTest {
 //    @Autowired
     private StudentService studentService;
 
+    @Autowired
+    private CollegeStudentRepository repository;
+
     @BeforeAll
     static void beforeAll() {
         collegeStudent = CollegeStudent.builder()
@@ -83,7 +88,10 @@ class GradeBookControllerTest {
 
     @AfterEach
     void tearDown() {
-        jdbcTemplate.execute("delete from student");
+        //What can go wrong here? So every test will create the 2 entries in student table, and then delete all,
+        //What you reckon will happen to the ID column? Be careful when using ID column in your tests, expecting it to be a certain number might not work.
+        //TODO: Run by uncommenting the following line
+//        jdbcTemplate.execute("delete from student");
     }
 
     @Test
@@ -101,12 +109,6 @@ class GradeBookControllerTest {
 
         List<CollegeStudent> students = (List<CollegeStudent>) modelAndView.getModel().get("students");
         Assertions.assertThat(students.size()).isGreaterThanOrEqualTo(2);
-    }
-
-    @Test
-    @Disabled("Yet to be built")
-    void Student_Information() {
-
     }
 
     private List<CollegeStudent> fetchStudentsFromDB(InvocationOnMock invocation) {
@@ -140,8 +142,7 @@ class GradeBookControllerTest {
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
 
-
-        /*MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/")
+     /*   MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(mapper.writeValueAsString(collegeStudent)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -158,4 +159,42 @@ class GradeBookControllerTest {
         ModelAndViewAssert.assertViewName(mvcResult.getModelAndView(), "index");
     }
 
+    @Test
+    public void deleteStudentHttpRequest() throws Exception {
+
+        //Note: @BeforeEach will ensure there is always a student with Id 1l present
+        org.junit.jupiter.api.Assertions.assertTrue(repository.findById(1L).isPresent());
+
+        Mockito.when(studentService.checkIfStudentExistsById(ArgumentMatchers.anyLong())).thenReturn(true);
+
+        // When your tests are set up correctly, you can just replace @MockBean with @Autowired, and comment any relevant mocks
+        Mockito.doAnswer(invocation -> {
+            Long studentId = invocation.getArgument(0, Long.class);
+            jdbcTemplate.execute("delete from student where id = " + studentId);
+            return null;
+        })
+                .when(studentService)
+                .deleteStudentById(1l);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/{studentId}", 1))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn();
+
+        ModelAndViewAssert.assertViewName(mvcResult.getModelAndView(), "index");
+
+        org.junit.jupiter.api.Assertions.assertFalse(repository.findById(1l).isPresent());
+    }
+
+    @Test
+    public void Delete_Non_Existing_Student_Http_Request() throws Exception {
+
+        Mockito.when(studentService.checkIfStudentExistsById(ArgumentMatchers.anyLong())).thenReturn(false);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/{studentId}", 3))
+                .andExpect(MockMvcResultMatchers.status().is2xxSuccessful())
+                .andReturn();
+
+        ModelAndViewAssert.assertViewName(mvcResult.getModelAndView(), "error");
+
+    }
 }

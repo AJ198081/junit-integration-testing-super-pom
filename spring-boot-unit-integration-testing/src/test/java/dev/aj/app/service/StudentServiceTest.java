@@ -1,7 +1,11 @@
 package dev.aj.app.service;
 
 import dev.aj.app.model.CollegeStudent;
+import dev.aj.app.model.enums.GradeType;
 import dev.aj.app.repository.CollegeStudentRepository;
+import dev.aj.app.repository.HistoryGradeRepository;
+import dev.aj.app.repository.MathGradeRepository;
+import dev.aj.app.repository.ScienceGradeRepository;
 import java.util.List;
 import java.util.Optional;
 import org.hamcrest.Matchers;
@@ -16,6 +20,9 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -44,6 +51,13 @@ class StudentServiceTest {
     @Autowired
     private CollegeStudentRepository collegeStudentRepository;
 
+    @Autowired
+    private MathGradeRepository mathGradeRepository;
+    @Autowired
+    private HistoryGradeRepository historyGradeRepository;
+    @Autowired
+    private ScienceGradeRepository scienceGradeRepository;
+
     @BeforeAll
     static void beforeAll() {
         collegeStudent = CollegeStudent.builder()
@@ -65,7 +79,8 @@ class StudentServiceTest {
     @AfterEach
     void tearDown() {
 //        Can be used to remove any mutual dependency on different tests
-//        jdbcTemplate.execute("delete from student");
+        jdbcTemplate.execute("delete from student");
+
     }
 
     @Test
@@ -87,6 +102,7 @@ class StudentServiceTest {
     @Test
     @Order(2) // Before it can be fetched
     public void TEST_SAVED_STUDENT_CAN_BE_FETCHED_SUCCESSFULLY() {
+        studentService.createStudent(collegeStudent);
         CollegeStudent studentFromDB = studentService.findStudentByEmail(EMAIL);
         Assertions.assertAll("Test student object fetched from DB is equal to the one that was saved",
                 () -> Assertions.assertNotNull(studentFromDB.getId(), () -> "Expected id of student to not be null, but was"),
@@ -125,10 +141,10 @@ class StudentServiceTest {
     }
 
     @Sql(scripts = "/insertData.sql")
-//Executes the provided SQL just prior to execution of this method, but after @BeforeEach, just required a datasource configured it will work
+    //Executes the provided SQL just prior to execution of this method, but after @BeforeEach, just required a datasource configured it will work
     @Test
     @Order(-1)
-    // These @Sql are direct DB insertion statements, executed on the DB directly, so ensure carried out upfront, other may have primary key already exist exception
+    // These @Sql are direct DB insertion statements, executed on the DB directly, carried out upfront, beware of primary key already exist exceptions
     public void GET_GRADE_BOOK_SERVICE() {
 
         studentService.createStudent(collegeStudent);
@@ -142,6 +158,7 @@ class StudentServiceTest {
             "insert into student(first_name, last_name, email) values ('R', 'B', 'rb@gmail.com')",
             "insert into student(first_name, last_name, email) values ('D', 'S', 'ds@gmail.com')"
     }) //Can provide an array of Sql instead as well, so long there is a datasource configured it will work
+
     @Test
     @Order(-2)
     public void TEST_SQL_ANNOTATION_WORKING() {
@@ -151,4 +168,70 @@ class StudentServiceTest {
         List<CollegeStudent> allStudents = studentService.getGradebook();
         org.assertj.core.api.Assertions.assertThat(allStudents.size()).isGreaterThanOrEqualTo(5);
     }
+
+    @Test
+    @Order(10)
+    void Test_Add_Math_Grade() {
+
+        CollegeStudent newStudent = studentService.createStudent(collegeStudent);
+
+        Assertions.assertTrue(studentService.createGrade(80.50, newStudent.getId(), GradeType.MATH));
+
+        org.hamcrest.MatcherAssert.assertThat(mathGradeRepository.count(), Matchers.greaterThanOrEqualTo(1l));
+    }
+
+    @Test
+    @Order(11)
+    void testAddHistoryGrade() {
+
+        CollegeStudent student = studentService.createStudent(collegeStudent);
+
+        Assertions.assertTrue(studentService.createGrade(80.00, student.getId(), GradeType.HISTORY));
+
+        org.hamcrest.MatcherAssert.assertThat(historyGradeRepository.count(), Matchers.greaterThanOrEqualTo(1l));
+    }
+
+    @Test
+    @Order(12)
+    void testAddScienceGrade() {
+
+        CollegeStudent student = studentService.createStudent(collegeStudent);
+
+        Assertions.assertTrue(studentService.createGrade(80.00, student.getId(), GradeType.SCIENCE));
+
+        org.hamcrest.MatcherAssert.assertThat(scienceGradeRepository.count(), Matchers.greaterThanOrEqualTo(1l));
+    }
+
+    @ParameterizedTest(name = "Invocation # {index} with grade value of {arguments}")
+    @ValueSource(doubles = {
+            -5, 105, 100.01, -0.01
+    })
+    void testGradesOutsideZeroAndHundredReturnsFalse(double grade) {
+        Assertions.assertFalse(studentService.createGrade(grade, studentService.createStudent(collegeStudent).getId(), GradeType.MATH));
+    }
+
+    @ParameterizedTest(name = "Invocation #{index} with grade value of {0} and type {1}")
+    @CsvSource({
+            "100.01, math",
+            "-0.01, math",
+            "100.01, science",
+            "-0.01, science",
+            "100.01, history",
+            "-0.01, history",
+            "100.01, finance",
+            "-0.01, finance"
+    })
+    void testGradesOutsideZeroAndHundredReturnsFalse(double grade, String gradeType) {
+        String gradeTypeForEnum = gradeType.toUpperCase();
+
+        //Technically, could have tested in different methods for scenario when enum doesn't exist, but not the purpose here.
+        try {
+            GradeType gradeTypeForEntry = GradeType.valueOf(gradeTypeForEnum);
+            Assertions.assertFalse(studentService.createGrade(grade, studentService.createStudent(collegeStudent).getId(), gradeTypeForEntry));
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
 }

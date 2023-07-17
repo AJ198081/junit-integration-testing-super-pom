@@ -27,7 +27,7 @@ function showOrHideGrade(gradeType) {
 }
 
 function deleteStudent(id) {
-    window.location.href = "/delete/student/" + id;
+    window.location.href = "/" + id;
 }
 
 function deleteMathGrade(id) {

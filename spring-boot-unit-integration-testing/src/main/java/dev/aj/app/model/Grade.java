@@ -3,13 +3,13 @@ package dev.aj.app.model;
 public interface Grade {
     double getGrade();
 
-    int getId();
+    Long getId();
 
-    void setId(int id);
+    void setId(Long id);
 
-    int getStudentId();
+    Long getStudentId();
 
-    void setStudentId(int studentId);
+    void setStudentId(Long studentId);
 
     void setGrade(double grade);
 }

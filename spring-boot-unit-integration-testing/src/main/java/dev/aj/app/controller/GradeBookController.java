@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -32,12 +31,14 @@ public class GradeBookController {
     }
 
     @GetMapping(path = "/studentInformation/{id}")
-    public String studentInformation(@PathVariable int id, Model model) {
+    public String studentInfo(@PathVariable int id, Model model) {
+
         return "studentInformation";
     }
 
     @PostMapping
     public String createStudent(@ModelAttribute("student") CollegeStudent student, Model model) { // Spring will ensure that 'params' are mapped to 'student'
+//    public String createStudent(@RequestBody() CollegeStudent student, Model model) { // Spring will ensure that 'params' are mapped to 'student'
 
         CollegeStudent savedStudent = studentService.createStudent(student);
 
@@ -45,17 +46,18 @@ public class GradeBookController {
         model.addAttribute("students", studentService.getGradebook());
 
         return "index";
-
     }
 
-/*    @PostMapping
-    public String createStudent(@RequestBody CollegeStudent student, Model model) { // Spring will ensure that 'params' are mapped to 'student'
+    @GetMapping(path = "/{id}")
+    public String deleteStudent(@PathVariable Long id, Model model) {
 
-        CollegeStudent savedStudent = studentService.createStudent(student);
+        if (!studentService.checkIfStudentExistsById(id)) {
+            return "error";
+        } else {
+            studentService.deleteStudentById(id);
+            model.addAttribute("students", studentService.getGradebook());
+            return "index";
+        }
+    }
 
-        model.addAttribute("savedStudent", savedStudent);
-        model.addAttribute("gradeBook", studentService.getGradebook());
-
-        return "index";
-    }*/
 }

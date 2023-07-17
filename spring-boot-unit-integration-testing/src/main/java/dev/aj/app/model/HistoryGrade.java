@@ -7,7 +7,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,9 +24,9 @@ public class HistoryGrade implements Grade {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
-    private int studentId;
+    private Long studentId;
 
     private double grade;
 
@@ -37,27 +36,27 @@ public class HistoryGrade implements Grade {
     }
 
     @Override
-    public int getId() {
+    public void setGrade(double grade) {
+        this.grade = grade;
+    }
+
+    @Override
+    public Long getId() {
         return this.id;
     }
 
     @Override
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
     @Override
-    public int getStudentId() {
+    public Long getStudentId() {
         return this.studentId;
     }
 
     @Override
-    public void setStudentId(int studentId) {
+    public void setStudentId(Long studentId) {
         this.studentId = studentId;
-    }
-
-    @Override
-    public void setGrade(double grade) {
-        this.grade = grade;
     }
 }
