@@ -1,6 +1,7 @@
 package dev.aj.app.service;
 
 import dev.aj.app.model.CollegeStudent;
+import dev.aj.app.model.Gradebook;
 import dev.aj.app.model.HistoryGrade;
 import dev.aj.app.model.MathGrade;
 import dev.aj.app.model.ScienceGrade;
@@ -11,8 +12,10 @@ import dev.aj.app.repository.MathGradeRepository;
 import dev.aj.app.repository.ScienceGradeRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @Service
@@ -43,7 +46,13 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
+    @Transactional
     public void deleteStudentById(Long studentId) {
+
+        mathGradeRepository.deleteAllByStudentId(studentId);
+        scienceGradeRepository.deleteAllByStudentId(studentId);
+        historyGradeRepository.deleteAllByStudentId(studentId);
+
         studentRepository.deleteById(studentId);
     }
 
@@ -89,5 +98,39 @@ public class StudentService {
             }
         }
         return false;
+    }
+
+    public Long deleteGrade(Long gradeId, GradeType gradeType) {
+
+        switch (gradeType) {
+            case MATH -> {
+                Optional<MathGrade> mathGradeById = mathGradeRepository.findMathGradeById(gradeId);
+                Optional<Long> studentId = mathGradeById.map(MathGrade::getStudentId);
+                if (mathGradeById.isPresent()) {
+                    mathGradeRepository.deleteById(gradeId);
+                    return studentId.orElse(0L);
+                }
+            }
+            case SCIENCE -> {
+                Optional<ScienceGrade> scienceGradeById = scienceGradeRepository.findScienceGradeById(gradeId);
+                Optional<Long> studentId = scienceGradeById.map(ScienceGrade::getStudentId);
+                if (scienceGradeById.isPresent()) {
+                    scienceGradeRepository.deleteById(gradeId);
+                    return studentId.orElse(0L);
+                }
+            }
+            case HISTORY -> {
+                Optional<HistoryGrade> historyGradeByStudentId = historyGradeRepository.findHistoryGradeById(gradeId);
+                Optional<Long> studentId = historyGradeByStudentId.map(HistoryGrade::getStudentId);
+                if (historyGradeByStudentId.isPresent()) {
+                    historyGradeRepository.deleteById(gradeId);
+                    return studentId.orElse(0L);
+                }
+            }
+            default -> {
+                return 0L;
+            }
+        }
+        return 0L;
     }
 }

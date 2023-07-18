@@ -8,4 +8,7 @@ public interface ScienceGradeRepository extends JpaRepository<ScienceGrade, Long
 
     Optional<ScienceGrade> findScienceGradeByStudentId(Long studentId);
 
+    Optional<ScienceGrade> findScienceGradeById(Long gradeId);
+
+    void deleteAllByStudentId(Long studentId);
 }

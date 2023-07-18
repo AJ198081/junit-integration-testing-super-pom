@@ -8,4 +8,7 @@ public interface HistoryGradeRepository extends JpaRepository<HistoryGrade, Long
 
     Optional<HistoryGrade> findHistoryGradeByStudentId(Long studentId);
 
+    Optional<HistoryGrade> findHistoryGradeById(Long gradeId);
+
+    void deleteAllByStudentId(Long studentId);
 }

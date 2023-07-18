@@ -8,4 +8,7 @@ public interface MathGradeRepository extends JpaRepository<MathGrade, Long> {
 
     Optional<MathGrade> findMathGradeByStudentId(Long studentId);
 
+    Optional<MathGrade> findMathGradeById(Long gradeId);
+
+    void deleteAllByStudentId(Long studentId);
 }

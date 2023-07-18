@@ -15,6 +15,6 @@ import org.springframework.stereotype.Component;
 @Builder
 public class Gradebook {
 
-    private List<GradebookCollegeStudent> students = new ArrayList<>();
+    private List<CollegeStudent> students = new ArrayList<>();
 
 }

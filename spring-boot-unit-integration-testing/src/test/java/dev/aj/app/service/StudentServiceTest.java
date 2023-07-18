@@ -1,12 +1,15 @@
 package dev.aj.app.service;
 
 import dev.aj.app.model.CollegeStudent;
+import dev.aj.app.model.Gradebook;
+import dev.aj.app.model.HistoryGrade;
 import dev.aj.app.model.enums.GradeType;
 import dev.aj.app.repository.CollegeStudentRepository;
 import dev.aj.app.repository.HistoryGradeRepository;
 import dev.aj.app.repository.MathGradeRepository;
 import dev.aj.app.repository.ScienceGradeRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
@@ -36,6 +39,7 @@ import org.springframework.test.context.jdbc.Sql;
 class StudentServiceTest {
 
     public static final String EMAIL = "abg@hotmail.com";
+    public static final int STUDENT_ID = 1;
 
     private static CollegeStudent collegeStudent;
 
@@ -80,11 +84,14 @@ class StudentServiceTest {
     void tearDown() {
 //        Can be used to remove any mutual dependency on different tests
         jdbcTemplate.execute("delete from student");
+        jdbcTemplate.execute("delete from math_grade");
+        jdbcTemplate.execute("delete from history_grade");
+        jdbcTemplate.execute("delete from science_grade");
 
     }
 
     @Test
-    @Order(1) // Need to save the student first,
+    @Order(STUDENT_ID) // Need to save the student first,
     public void TEST_STUDENT_CREATED_SUCCESSFULLY() {
 
         CollegeStudent savedStudent = studentService.createStudent(collegeStudent);
@@ -119,13 +126,13 @@ class StudentServiceTest {
 
         List<CollegeStudent> collegeStudents = jdbcTemplate.query("select id, first_name, last_name, email from student", (rs, rowNum) -> {
             return CollegeStudent.builder()
-                    .id(rs.getLong(1))
+                    .id(rs.getLong(STUDENT_ID))
                     .firstName(rs.getString(2))
                     .lastName(rs.getString(3))
                     .email(rs.getString(4))
                     .build();
         });
-        org.assertj.core.api.Assertions.assertThat(collegeStudents.size()).isGreaterThanOrEqualTo(1);
+        org.assertj.core.api.Assertions.assertThat(collegeStudents.size()).isGreaterThanOrEqualTo(STUDENT_ID);
     }
 
     @Test
@@ -143,7 +150,7 @@ class StudentServiceTest {
     @Sql(scripts = "/insertData.sql")
     //Executes the provided SQL just prior to execution of this method, but after @BeforeEach, just required a datasource configured it will work
     @Test
-    @Order(-1)
+    @Order(-STUDENT_ID)
     // These @Sql are direct DB insertion statements, executed on the DB directly, carried out upfront, beware of primary key already exist exceptions
     public void GET_GRADE_BOOK_SERVICE() {
 
@@ -158,7 +165,6 @@ class StudentServiceTest {
             "insert into student(first_name, last_name, email) values ('R', 'B', 'rb@gmail.com')",
             "insert into student(first_name, last_name, email) values ('D', 'S', 'ds@gmail.com')"
     }) //Can provide an array of Sql instead as well, so long there is a datasource configured it will work
-
     @Test
     @Order(-2)
     public void TEST_SQL_ANNOTATION_WORKING() {
@@ -182,7 +188,7 @@ class StudentServiceTest {
 
     @Test
     @Order(11)
-    void testAddHistoryGrade() {
+    void Test_Add_History_Grade() {
 
         CollegeStudent student = studentService.createStudent(collegeStudent);
 
@@ -193,7 +199,7 @@ class StudentServiceTest {
 
     @Test
     @Order(12)
-    void testAddScienceGrade() {
+    void Test_Add_Science_Grade() {
 
         CollegeStudent student = studentService.createStudent(collegeStudent);
 
@@ -206,7 +212,7 @@ class StudentServiceTest {
     @ValueSource(doubles = {
             -5, 105, 100.01, -0.01
     })
-    void testGradesOutsideZeroAndHundredReturnsFalse(double grade) {
+    void Test_Grades_Outside_Zero_And_Hundred_Returns_False(double grade) {
         Assertions.assertFalse(studentService.createGrade(grade, studentService.createStudent(collegeStudent).getId(), GradeType.MATH));
     }
 
@@ -221,17 +227,169 @@ class StudentServiceTest {
             "100.01, finance",
             "-0.01, finance"
     })
-    void testGradesOutsideZeroAndHundredReturnsFalse(double grade, String gradeType) {
+    void Test_Grades_Outside_Zero_And_Hundred_Returns_False(double grade, String gradeType) {
         String gradeTypeForEnum = gradeType.toUpperCase();
 
-        //Technically, could have tested in different methods for scenario when enum doesn't exist, but not the purpose here.
+        //Technically, should have tested in different methods for scenario when enum doesn't exist, but not the purpose here.
         try {
             GradeType gradeTypeForEntry = GradeType.valueOf(gradeTypeForEnum);
             Assertions.assertFalse(studentService.createGrade(grade, studentService.createStudent(collegeStudent).getId(), gradeTypeForEntry));
         } catch (IllegalArgumentException e) {
             System.out.println(e.getMessage());
         }
-
     }
+
+    @Sql(statements = {
+            "insert into student(id, first_name, last_name, email) values(1, 'AJ', 'B', 'abg@hotmail.com')",
+            "insert into math_grade(student_id, grade) values(1, 80.0)",
+            "insert into math_grade(student_id, grade) values(1, 85.0)"
+    })
+    @Test
+    void Test_Delete_Math_Grade() {
+
+        List<Map<Long, Long>> listOfGradeAndStudentMap = jdbcTemplate.query("select id, student_id from math_grade", (rs, rowNum) -> {
+            return Map.of(rs.getLong(1), rs.getLong(2));
+        });
+
+        listOfGradeAndStudentMap.forEach(longLongMap -> longLongMap.forEach((key, value) -> {
+            Long actualStudentId = studentService.deleteGrade(key, GradeType.MATH);
+            Assertions.assertEquals(value, actualStudentId,
+                    () -> String.format("Expected studentId %s, but received %s", value, actualStudentId));
+        }));
+    }
+
+    @Sql(statements = {
+            "insert into student(id, first_name, last_name, email) values(2, 'AJ', 'B', 'abg@hotmail.com')",
+            "insert into science_grade(student_id, grade) values(2, 85.0)"
+    })
+    @Test
+    void Test_Delete_Science_Grade() {
+
+        List<Map<Long, Long>> listOfGradeAndStudentMap = jdbcTemplate.query("select id, student_id from science_grade", (rs, rowNum) -> {
+            return Map.of(rs.getLong(1), rs.getLong(2));
+        });
+
+        listOfGradeAndStudentMap.forEach(longLongMap -> longLongMap.forEach((key, value) -> {
+            Long actualStudentId = studentService.deleteGrade(key, GradeType.SCIENCE);
+            Assertions.assertEquals(value, actualStudentId,
+                    () -> String.format("Expected studentId %s, but received %s", value, actualStudentId));
+        }));
+    }
+
+    @Sql(statements = {
+            "insert into student(id, first_name, last_name, email) values(3, 'AJ', 'B', 'abg@hotmail.com')",
+            "insert into history_grade(student_id, grade) values(3, 80.0)"
+    })
+    @Test
+    void Test_Delete_History_Grade() {
+
+        List<Map<Long, Long>> listOfGradeAndStudentMap = jdbcTemplate.query("select id, student_id from history_grade", (rs, rowNum) -> {
+            return Map.of(rs.getLong(1), rs.getLong(2));
+        });
+
+        listOfGradeAndStudentMap.forEach(longLongMap -> longLongMap.forEach((key, value) -> {
+            Long actualStudentId = studentService.deleteGrade(key, GradeType.HISTORY);
+            Assertions.assertEquals(value, actualStudentId,
+                    () -> String.format("Expected studentId %s, but received %s", value, actualStudentId));
+        }));
+    }
+
+    @Test
+    void Test_Delete_History_Grade_With_Non_Existence_Student_Id() {
+        Long studentGradeOfDeletedStudent = studentService.deleteGrade(1L, GradeType.HISTORY);
+        Assertions.assertEquals(0L, studentGradeOfDeletedStudent, () -> String.format("Should have returned the Student Id - %s of the deleted student, but returned %s.", STUDENT_ID, studentGradeOfDeletedStudent));
+    }
+
+    @Sql(statements = {
+            "insert into student(id, first_name, last_name, email) values(3, 'AJ', 'B', 'abg@hotmail.com')",
+            "insert into history_grade(student_id, grade) values(3, 80.0)"
+    })
+    @Test
+    void Test_Delete_Grade_By_Non_Existence_Grade_Type() {
+        List<Map<Long, Long>> listOfGradeAndStudentMap = jdbcTemplate.query("select id, student_id from science_grade", (rs, rowNum) -> {
+            return Map.of(rs.getLong(1), rs.getLong(2));
+        });
+
+        listOfGradeAndStudentMap.forEach(longLongMap -> longLongMap.forEach((key, value) -> {
+            Long actualStudentId = studentService.deleteGrade(key, GradeType.SCIENCE);
+            Assertions.assertEquals(0L, actualStudentId,
+                    () -> String.format("Expected no studentId to be deleted, but was %s.", actualStudentId));
+        }));
+    }
+
+    @Sql(statements = {
+            "insert into student(id, first_name, last_name, email) values(1, 'AJ', 'B', 'abg@hotmail.com')",
+            "insert into math_grade(student_id, grade) values(1, 80.0)",
+            "insert into science_grade(student_id, grade) values(1, 81.0)",
+            "insert into history_grade(student_id, grade) values(1, 82.0)",
+    })
+    @Test
+    void Test_Delete_Student_Deletes_Associated_Grades() {
+
+        Optional<CollegeStudent> student = studentDao.findById(1L);
+        Optional<HistoryGrade> historyGradeByStudentId = historyGradeRepository.findHistoryGradeByStudentId(1L);
+
+        Assertions.assertAll("Test student and associated grade is present",
+                () -> Assertions.assertTrue(student.isPresent(), () -> "Expected student to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(historyGradeByStudentId.isPresent(), () -> "Expected history grade to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(scienceGradeRepository.findScienceGradeByStudentId(1L).isPresent(), () -> "Expected science grade to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(mathGradeRepository.findMathGradeByStudentId(1L).isPresent(), () -> "Expected math grade to be present in DB, but wasn't.")
+        );
+
+        studentService.deleteStudentById(1L);
+
+        Assertions.assertAll("Test student and associated grade aren't present",
+                () -> Assertions.assertFalse(studentDao.findById(1L).isPresent(), () -> "Expected student to be deleted in DB, but wasn't."),
+                () -> Assertions.assertFalse(historyGradeRepository.findHistoryGradeByStudentId(1L).isPresent(), () -> "Expected history grade to be deleted in DB, but wasn't."),
+                () -> Assertions.assertFalse(scienceGradeRepository.findScienceGradeByStudentId(1L).isPresent(), () -> "Expected science grade to be deleted in DB, but wasn't."),
+                () -> Assertions.assertFalse(mathGradeRepository.findMathGradeByStudentId(1L).isPresent(), () -> "Expected math grade to be deleted in DB, but wasn't.")
+        );
+    }
+    @Sql(statements = {
+            "insert into student(id, first_name, last_name, email) values(1, 'AJ', 'B', 'abg@hotmail.com')",
+            "insert into student(id, first_name, last_name, email) values(2, 'DJ', 'B', 'djg@hotmail.com')",
+            "insert into math_grade(student_id, grade) values(1, 80.0)",
+            "insert into math_grade(student_id, grade) values(2, 80.0)",
+            "insert into science_grade(student_id, grade) values(1, 81.0)",
+            "insert into science_grade(student_id, grade) values(2, 81.0)",
+            "insert into history_grade(student_id, grade) values(1, 82.0)",
+            "insert into history_grade(student_id, grade) values(2, 82.0)",
+    })
+
+    @Test
+    void Test_Delete_Student_Does_Not_Delete_Non_Associated_Grades() {
+
+        Optional<CollegeStudent> student = studentDao.findById(1L);
+        Optional<HistoryGrade> historyGradeByStudentId = historyGradeRepository.findHistoryGradeByStudentId(1L);
+
+        Assertions.assertAll("Test student and associated grade is present",
+                () -> Assertions.assertTrue(student.isPresent(), () -> "Expected student to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(historyGradeByStudentId.isPresent(), () -> "Expected history grade to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(scienceGradeRepository.findScienceGradeByStudentId(1L).isPresent(), () -> "Expected science grade to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(mathGradeRepository.findMathGradeByStudentId(1L).isPresent(), () -> "Expected math grade to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(historyGradeRepository.findHistoryGradeByStudentId(2L).isPresent(), () -> "Expected history grade to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(scienceGradeRepository.findScienceGradeByStudentId(2L).isPresent(), () -> "Expected science grade to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(mathGradeRepository.findMathGradeByStudentId(2L).isPresent(), () -> "Expected math grade to be present in DB, but wasn't.")
+        );
+
+        studentService.deleteStudentById(1L);
+
+        Assertions.assertAll("Test student and associated grade aren't present",
+                () -> Assertions.assertFalse(studentDao.findById(1L).isPresent(), () -> "Expected student to be deleted in DB, but wasn't."),
+                () -> Assertions.assertFalse(historyGradeRepository.findHistoryGradeByStudentId(1L).isPresent(), () -> "Expected history grade to be deleted in DB, but wasn't."),
+                () -> Assertions.assertFalse(scienceGradeRepository.findScienceGradeByStudentId(1L).isPresent(), () -> "Expected science grade to be deleted in DB, but wasn't."),
+                () -> Assertions.assertFalse(mathGradeRepository.findMathGradeByStudentId(1L).isPresent(), () -> "Expected math grade to be deleted in DB, but wasn't."),
+                () -> Assertions.assertTrue(historyGradeRepository.findHistoryGradeByStudentId(2L).isPresent(), () -> "Expected history grade to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(scienceGradeRepository.findScienceGradeByStudentId(2L).isPresent(), () -> "Expected science grade to be present in DB, but wasn't."),
+                () -> Assertions.assertTrue(mathGradeRepository.findMathGradeByStudentId(2L).isPresent(), () -> "Expected math grade to be present in DB, but wasn't.")
+
+        );
+    }
+
+    @Test
+    void Test_Student_Information_Retrieved_Successfully() {
+        Assertions.assertIterableEquals(List.of(), studentService.getGradebook(), () -> "Should have returned grade book.");
+    }
+
 
 }
