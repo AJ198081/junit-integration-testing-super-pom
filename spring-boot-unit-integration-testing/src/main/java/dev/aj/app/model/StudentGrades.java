@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 @Data
 public class StudentGrades {
 
-    private List<Grade> mathGradeResults;
-    private List<Grade> scienceGradeResults;
-    private List<Grade> historyGradeResults;
+    private List<MathGrade> mathGradeResults;
+    private List<ScienceGrade> scienceGradeResults;
+    private List<HistoryGrade> historyGradeResults;
 
     public double findGradePointAverage(List<Grade> grades) {
         return grades.stream()

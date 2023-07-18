@@ -2,9 +2,11 @@ package dev.aj.app.service;
 
 import dev.aj.app.model.CollegeStudent;
 import dev.aj.app.model.Gradebook;
+import dev.aj.app.model.GradebookCollegeStudent;
 import dev.aj.app.model.HistoryGrade;
 import dev.aj.app.model.MathGrade;
 import dev.aj.app.model.ScienceGrade;
+import dev.aj.app.model.StudentGrades;
 import dev.aj.app.model.enums.GradeType;
 import dev.aj.app.repository.CollegeStudentRepository;
 import dev.aj.app.repository.HistoryGradeRepository;
@@ -133,4 +135,28 @@ public class StudentService {
         }
         return 0L;
     }
+
+    public GradebookCollegeStudent studentInformation(long studentId) {
+        Optional<CollegeStudent> collegeStudent = studentRepository.findById(studentId);
+
+        if (collegeStudent.isEmpty()){
+            return null;
+        }
+
+        List<MathGrade> mathGrade = mathGradeRepository.findAllByStudentId(studentId);
+        List<ScienceGrade> scienceGrade = scienceGradeRepository.findAllByStudentId(studentId);
+        List<HistoryGrade> historyGrade = historyGradeRepository.findAllByStudentId(studentId);
+
+        StudentGrades studentGrades = new StudentGrades(mathGrade, scienceGrade, historyGrade);
+
+        GradebookCollegeStudent gradebookCollegeStudent = new GradebookCollegeStudent(studentGrades);
+
+        gradebookCollegeStudent.setId(studentId);
+        gradebookCollegeStudent.setFirstName(collegeStudent.get().getFirstName());
+        gradebookCollegeStudent.setLastName(collegeStudent.get().getLastName());
+        gradebookCollegeStudent.setEmail(collegeStudent.get().getEmail());
+
+        return gradebookCollegeStudent;
+    }
+
 }

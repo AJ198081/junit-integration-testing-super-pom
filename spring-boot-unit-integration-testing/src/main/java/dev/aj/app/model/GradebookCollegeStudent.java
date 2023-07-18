@@ -1,8 +1,18 @@
 package dev.aj.app.model;
 
-public class GradebookCollegeStudent extends CollegeStudent{
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-    private int id;
+@Getter
+@Setter
+@ToString(callSuper = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class GradebookCollegeStudent extends CollegeStudent {
+
     private StudentGrades studentGrades;
 
 }

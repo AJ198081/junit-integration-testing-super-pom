@@ -1,7 +1,7 @@
 package dev.aj.app.service;
 
 import dev.aj.app.model.CollegeStudent;
-import dev.aj.app.model.Gradebook;
+import dev.aj.app.model.GradebookCollegeStudent;
 import dev.aj.app.model.HistoryGrade;
 import dev.aj.app.model.enums.GradeType;
 import dev.aj.app.repository.CollegeStudentRepository;
@@ -345,6 +345,7 @@ class StudentServiceTest {
                 () -> Assertions.assertFalse(mathGradeRepository.findMathGradeByStudentId(1L).isPresent(), () -> "Expected math grade to be deleted in DB, but wasn't.")
         );
     }
+
     @Sql(statements = {
             "insert into student(id, first_name, last_name, email) values(1, 'AJ', 'B', 'abg@hotmail.com')",
             "insert into student(id, first_name, last_name, email) values(2, 'DJ', 'B', 'djg@hotmail.com')",
@@ -355,7 +356,6 @@ class StudentServiceTest {
             "insert into history_grade(student_id, grade) values(1, 82.0)",
             "insert into history_grade(student_id, grade) values(2, 82.0)",
     })
-
     @Test
     void Test_Delete_Student_Does_Not_Delete_Non_Associated_Grades() {
 
@@ -386,9 +386,32 @@ class StudentServiceTest {
         );
     }
 
+    @Sql(scripts = "/insert_student_grades.sql")
     @Test
     void Test_Student_Information_Retrieved_Successfully() {
-        Assertions.assertIterableEquals(List.of(), studentService.getGradebook(), () -> "Should have returned grade book.");
+
+        GradebookCollegeStudent gradebookCollegeStudent = studentService.studentInformation(1L);
+
+        Assertions.assertAll("Check GradebookCollegeStudent",
+                () -> Assertions.assertNotNull(gradebookCollegeStudent, "GradebookCollegeStudent shouldn't be null"),
+                () -> Assertions.assertEquals(1L, gradebookCollegeStudent.getId(), () -> "Should have returned student id 1"),
+                () -> Assertions.assertEquals("AJ", gradebookCollegeStudent.getFirstName(), "Firstname should be 'AJ'"),
+                () -> Assertions.assertEquals("abg@hotmail.com", gradebookCollegeStudent.getEmail(), "Email should be 'abg@gmail.com'"),
+                () -> Assertions.assertEquals(1, gradebookCollegeStudent.getStudentGrades().getHistoryGradeResults().size()),
+                () -> Assertions.assertEquals(1, gradebookCollegeStudent.getStudentGrades().getMathGradeResults().size()),
+                () -> Assertions.assertEquals(1, gradebookCollegeStudent.getStudentGrades().getScienceGradeResults().size())
+        );
+    }
+
+    @Sql(scripts = "/insert_student_grades.sql")
+    @Test
+    void Test_Student_Information_Return_Null_For_Non_Existence_Student() {
+
+        GradebookCollegeStudent gradebookCollegeStudent = studentService.studentInformation(3L);
+
+        Assertions.assertAll("Check GradebookCollegeStudent is null",
+                () -> Assertions.assertNull(gradebookCollegeStudent, "GradebookCollegeStudent should have been null, but wasn't.")
+        );
     }
 
 
