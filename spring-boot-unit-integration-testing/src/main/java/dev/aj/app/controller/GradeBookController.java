@@ -2,7 +2,11 @@ package dev.aj.app.controller;
 
 import dev.aj.app.model.CollegeStudent;
 import dev.aj.app.model.Gradebook;
+import dev.aj.app.model.GradebookCollegeStudent;
+import dev.aj.app.model.StudentGrades;
+import dev.aj.app.model.enums.GradeType;
 import dev.aj.app.service.StudentService;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,12 +16,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/")
 @RequiredArgsConstructor
 public class GradeBookController {
 
+    public static final String INDEX = "index";
     private final Gradebook gradebook;
 
     private final StudentService studentService;
@@ -27,11 +33,17 @@ public class GradeBookController {
 
         model.addAttribute("students", studentService.getGradebook());
 
-        return "index";
+        return INDEX;
     }
 
     @GetMapping(path = "/studentInformation/{id}")
-    public String studentInfo(@PathVariable int id, Model model) {
+    public String studentInfo(@PathVariable Long id, Model model) {
+
+        if (!studentService.checkIfStudentExistsById(id)) {
+            return "error";
+        }
+
+        populateStudentInformationModel(id, model);
 
         return "studentInformation";
     }
@@ -45,7 +57,7 @@ public class GradeBookController {
         model.addAttribute("savedStudent", savedStudent);
         model.addAttribute("students", studentService.getGradebook());
 
-        return "index";
+        return INDEX;
     }
 
     @GetMapping(path = "/{id}")
@@ -56,7 +68,57 @@ public class GradeBookController {
         } else {
             studentService.deleteStudentById(id);
             model.addAttribute("students", studentService.getGradebook());
-            return "index";
+            return INDEX;
+        }
+    }
+
+    @PostMapping(path = "/grade")
+    public String createGrade(@RequestParam("grade") double grade, @RequestParam("gradeType") GradeType gradeType, @RequestParam("studentId") Long studentId, Model model) {
+
+        if (!studentService.checkIfStudentExistsById(studentId)) {
+            return "error";
+        }
+
+        boolean gradeCreated = studentService.createGrade(grade, studentId, gradeType);
+
+        if (!gradeCreated) return "error";
+
+        populateStudentInformationModel(studentId, model);
+
+
+        return "studentInformation";
+    }
+
+    private void populateStudentInformationModel(Long studentId, Model model) {
+        GradebookCollegeStudent gradebookCollegeStudent = studentService.studentInformation(studentId);
+
+        model.addAttribute("student", gradebookCollegeStudent);
+
+        if (Objects.nonNull(gradebookCollegeStudent) && Objects.nonNull(gradebookCollegeStudent.getStudentGrades())) {
+
+            StudentGrades studentGrades = Objects.requireNonNull(gradebookCollegeStudent.getStudentGrades(),
+                    "StudentGrades are null");
+
+            if (studentGrades.getMathGradeResults() != null) {
+                model.addAttribute("mathAverage", studentGrades.findGradePointAverage(
+                        studentGrades.getMathGradeResults()));
+            } else {
+                model.addAttribute("mathAverage", "N/A");
+            }
+
+            if (studentGrades.getScienceGradeResults() != null) {
+                model.addAttribute("scienceAverage", studentGrades.findGradePointAverage(
+                        studentGrades.getScienceGradeResults()));
+            } else {
+                model.addAttribute("scienceAverage", "N/A");
+            }
+
+            if (studentGrades.getHistoryGradeResults() != null) {
+                model.addAttribute("historyAverage", studentGrades.findGradePointAverage(
+                        studentGrades.getHistoryGradeResults()));
+            } else {
+                model.addAttribute("historyAverage", "N/A");
+            }
         }
     }
 

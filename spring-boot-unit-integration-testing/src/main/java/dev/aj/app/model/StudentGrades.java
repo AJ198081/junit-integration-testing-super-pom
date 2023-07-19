@@ -18,7 +18,7 @@ public class StudentGrades {
     private List<ScienceGrade> scienceGradeResults;
     private List<HistoryGrade> historyGradeResults;
 
-    public double findGradePointAverage(List<Grade> grades) {
+    public double findGradePointAverage(List<? extends Grade> grades) {
         return grades.stream()
                 .mapToDouble(Grade::getGrade)
                 .average().orElseGet(() -> 0.0);
