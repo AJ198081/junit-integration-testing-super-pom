@@ -10,8 +10,6 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Controller
 @RequestMapping("/")
@@ -27,7 +24,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 public class GradeBookController {
 
     public static final String INDEX = "index";
-    private final Gradebook gradebook;
 
     private final StudentService studentService;
 
