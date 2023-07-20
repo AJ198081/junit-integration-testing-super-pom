@@ -33,7 +33,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest
-@TestPropertySource(locations = "/application.properties")
+@TestPropertySource(locations = "/application-test.properties")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class StudentServiceTest {

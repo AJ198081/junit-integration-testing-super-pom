@@ -31,15 +31,15 @@ function deleteStudent(id) {
 }
 
 function deleteMathGrade(id) {
-    window.location.href = "/grades/" + id + "/" + "math";
+    window.location.href = "/grade/" + id + "/" + "MATH";
 }
 
 function deleteScienceGrade(id) {
-    window.location.href = "/grades/" + id + "/" + "science";
+    window.location.href = "/grade/" + id + "/" + "SCIENCE";
 }
 
 function deleteHistoryGrade(id) {
-    window.location.href = "/grades/" + id + "/" + "history";
+    window.location.href = "/grade/" + id + "/" + "HISTORY";
 }
 
 function studentInfo(id) {

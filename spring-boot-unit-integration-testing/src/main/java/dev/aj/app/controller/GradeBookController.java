@@ -10,6 +10,8 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @Controller
 @RequestMapping("/")
@@ -82,14 +85,24 @@ public class GradeBookController {
         boolean gradeCreated = studentService.createGrade(grade, studentId, gradeType);
 
         if (!gradeCreated) return "error";
+        populateStudentInformationModel(studentId, model);
+        return "studentInformation";
+    }
+
+    @GetMapping(path = "/grade/{id}/{gradeType}")
+    public String deleteGrade(@PathVariable Long id, @PathVariable GradeType gradeType, Model model) {
+
+        Long studentId = studentService.deleteGrade(id, gradeType);
+
+        if (studentId == 0) return "error";
 
         populateStudentInformationModel(studentId, model);
-
 
         return "studentInformation";
     }
 
     private void populateStudentInformationModel(Long studentId, Model model) {
+
         GradebookCollegeStudent gradebookCollegeStudent = studentService.studentInformation(studentId);
 
         model.addAttribute("student", gradebookCollegeStudent);
@@ -102,9 +115,7 @@ public class GradeBookController {
             if (studentGrades.getMathGradeResults() != null) {
                 model.addAttribute("mathAverage", studentGrades.findGradePointAverage(
                         studentGrades.getMathGradeResults()));
-            } else {
-                model.addAttribute("mathAverage", "N/A");
-            }
+            } else model.addAttribute("mathAverage", "N/A");
 
             if (studentGrades.getScienceGradeResults() != null) {
                 model.addAttribute("scienceAverage", studentGrades.findGradePointAverage(

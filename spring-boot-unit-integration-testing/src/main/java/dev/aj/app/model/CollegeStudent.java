@@ -42,6 +42,6 @@ public class CollegeStudent implements Student {
 
     @Override
     public String getFullName() {
-        return String.format("%s %s", firstName, lastName);
+        return firstName + " " + lastName;
     }
 }

@@ -63,9 +63,7 @@ public class StudentService {
     }
 
     public boolean createGrade(double grade, long studentId, GradeType gradeType) {
-        if (!checkIfStudentExistsById(studentId)) {
-            return false;
-        }
+        if (!checkIfStudentExistsById(studentId)) return false;
 
         if (grade >= 0 && grade <= 100) {
             switch (gradeType) {

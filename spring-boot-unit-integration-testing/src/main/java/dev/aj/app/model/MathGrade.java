@@ -32,7 +32,7 @@ public class MathGrade implements Grade{
 
     @Override
     public double getGrade() {
-        return 0;
+        return grade;
     }
 
     @Override

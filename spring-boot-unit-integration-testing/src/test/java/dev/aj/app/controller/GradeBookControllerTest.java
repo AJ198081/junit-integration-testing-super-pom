@@ -6,6 +6,7 @@ import dev.aj.app.model.GradebookCollegeStudent;
 import dev.aj.app.model.StudentGrades;
 import dev.aj.app.model.enums.GradeType;
 import dev.aj.app.repository.CollegeStudentRepository;
+import dev.aj.app.repository.MathGradeRepository;
 import dev.aj.app.service.StudentService;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.mockito.ArgumentMatchers;
@@ -44,7 +46,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 
 @AutoConfigureMockMvc()
 @SpringBootTest
-@TestPropertySource("/application.properties")
+@TestPropertySource("/application-test.properties")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class GradeBookControllerTest {
@@ -69,6 +71,9 @@ class GradeBookControllerTest {
 //    @Autowired //Don't forget to remove mock calls.
     private StudentService studentService;
 
+    @MockBean
+    private MathGradeRepository mathGradeRepository;
+
     @Autowired
     private CollegeStudentRepository repository;
 
@@ -88,11 +93,10 @@ class GradeBookControllerTest {
     }
 
     @Test
+    @Order(1)
     void deleteStudentHttpRequest() throws Exception {
 
         //Note: @BeforeEach will ensure there is always a student with Id 1l present
-        assertTrue(repository.findById(1L)
-                             .isPresent());
 
         Mockito.when(studentService.checkIfStudentExistsById(anyLong()))
                .thenReturn(true);
@@ -104,7 +108,7 @@ class GradeBookControllerTest {
                    return null;
                })
                .when(studentService)
-               .deleteStudentById(1l);
+               .deleteStudentById(getAValidStudentId());
 
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/{studentId}", 1))
                                      .andExpect(MockMvcResultMatchers.status()
@@ -176,6 +180,13 @@ class GradeBookControllerTest {
 
         assertTrue(repository.findById(studentId)
                              .isPresent());
+
+        GradebookCollegeStudent gradebookCollegeStudent = new GradebookCollegeStudent(new StudentGrades());
+        gradebookCollegeStudent.setFirstName(collegeStudent.getFirstName());
+        gradebookCollegeStudent.setLastName(collegeStudent.getLastName());
+
+        Mockito.when(studentService.studentInformation(anyLong()))
+               .thenReturn(gradebookCollegeStudent);
 
         Mockito.when(studentService.checkIfStudentExistsById(studentId))
                .thenReturn(true);
@@ -249,7 +260,116 @@ class GradeBookControllerTest {
     }
 
     @Test
-    public void Create_Student_Http_Request() throws Exception {
+    void createValidGradeHttpRequestForNonExistenceStudent() throws Exception {
+        Long inValidStudentId = getFirstInValidStudentId();
+
+        org.junit.jupiter.api.Assertions.assertFalse(repository.findById(inValidStudentId)
+                                                              .isPresent());
+
+        Mockito.when(studentService.checkIfStudentExistsById(anyLong()))
+               .thenReturn(false);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/grade")
+                                                                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                                    .param("grade", "85.00")
+                                                                    .param("gradeType", "MATH")
+                                                                    .param("studentId", String.valueOf(inValidStudentId))
+                                     )
+                                     .andExpect(MockMvcResultMatchers.status()
+                                                                     .isOk())
+                                     .andReturn();
+
+        ModelAndViewAssert.assertViewName(Objects.requireNonNull(mvcResult.getModelAndView()), "error");
+
+        Mockito.verify(studentService, Mockito.times(0))
+               .createGrade(ArgumentMatchers.anyDouble(), anyLong(), ArgumentMatchers.any(
+                       GradeType.class));
+    }
+
+    @Test
+    void createInvalidGradeTypeHttpRequest() throws Exception {
+        Long inValidStudentId = getFirstInValidStudentId();
+
+        org.junit.jupiter.api.Assertions.assertFalse(repository.findById(inValidStudentId)
+                                                              .isPresent());
+
+        Mockito.when(studentService.checkIfStudentExistsById(anyLong()))
+               .thenReturn(false);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/grade")
+                                                                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                                                                    .param("grade", "85.00")
+                                                                    .param("gradeType", "UnknownSubject")
+                                                                    .param("studentId", String.valueOf(inValidStudentId))
+                                     )
+                                     .andExpect(MockMvcResultMatchers.status()
+                                                                     .is4xxClientError())
+                                     .andReturn();
+
+        ModelAndViewAssert.assertViewName(Objects.requireNonNull(mvcResult.getModelAndView()), "error");
+
+        Mockito.verify(studentService, Mockito.times(0))
+               .createGrade(ArgumentMatchers.anyDouble(), anyLong(), ArgumentMatchers.any(
+                       GradeType.class));
+    }
+
+    @Test
+    void deleteAValidGradeHttpRequest() throws Exception {
+
+        GradebookCollegeStudent gradebookCollegeStudent = new GradebookCollegeStudent(new StudentGrades());
+        gradebookCollegeStudent.setFirstName(collegeStudent.getFirstName());
+        gradebookCollegeStudent.setLastName(collegeStudent.getLastName());
+
+        Mockito.when(studentService.studentInformation(anyLong()))
+               .thenReturn(gradebookCollegeStudent);
+
+        Mockito.when(studentService.deleteGrade(1L, GradeType.MATH))
+               .thenReturn(1L);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/grade/{id}/{gradeType}", 1, "MATH"))
+                                     .andExpect(MockMvcResultMatchers.status()
+                                                                     .isOk())
+                                     .andReturn();
+
+        ModelAndViewAssert.assertViewName(mvcResult.getModelAndView(), "studentInformation");
+
+        Mockito.verify(studentService, Mockito.times(1))
+               .deleteGrade(1L, GradeType.MATH);
+    }
+
+    @Test
+    void deleteAValidGradeHttpRequestStudentIdDoesNotExists() throws Exception {
+
+        Mockito.when(studentService.deleteGrade(1L, GradeType.MATH))
+               .thenReturn(0L);
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/grade/{id}/{gradeType}", 1, "MATH"))
+                                     .andExpect(MockMvcResultMatchers.status()
+                                                                     .isOk())
+                                     .andReturn();
+
+        ModelAndViewAssert.assertViewName(mvcResult.getModelAndView(), "error");
+
+        Mockito.verify(studentService, Mockito.times(1))
+               .deleteGrade(1L, GradeType.MATH);
+    }
+
+    @Test
+    void deleteInvalidGradeHttpRequest() throws Exception {
+
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get("/grade/{id}/{gradeType}", 1, "UnknownSubject"))
+                                     .andExpect(MockMvcResultMatchers.status()
+                                                                     .is4xxClientError())
+                                     .andReturn();
+
+        ModelAndViewAssert.assertViewName(Objects.requireNonNull(mvcResult.getModelAndView()), "error");
+
+        Mockito.verify(studentService, Mockito.times(0))
+               .deleteGrade(1L, GradeType.MATH);
+    }
+
+    @Test
+    void Create_Student_Http_Request() throws Exception {
 
         Mockito.when(studentService.getGradebook())
                .thenReturn(List.of(collegeStudent));
