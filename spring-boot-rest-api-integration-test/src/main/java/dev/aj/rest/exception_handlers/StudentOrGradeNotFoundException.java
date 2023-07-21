@@ -1,4 +1,4 @@
-package dev.aj.app.exception_handlers;
+package rest.exception_handlers;
 
 public class StudentOrGradeNotFoundException extends RuntimeException {
 

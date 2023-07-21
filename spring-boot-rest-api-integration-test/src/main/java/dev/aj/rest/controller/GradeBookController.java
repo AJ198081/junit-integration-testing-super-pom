@@ -1,7 +1,7 @@
 package rest.controller;
 
-import dev.aj.app.exception_handlers.StudentOrGradeErrorResponse;
-import dev.aj.app.exception_handlers.StudentOrGradeNotFoundException;
+import rest.exception_handlers.StudentOrGradeErrorResponse;
+import rest.exception_handlers.StudentOrGradeNotFoundException;
 import rest.model.CollegeStudent;
 import rest.model.enums.GradeType;
 import rest.service.StudentService;
