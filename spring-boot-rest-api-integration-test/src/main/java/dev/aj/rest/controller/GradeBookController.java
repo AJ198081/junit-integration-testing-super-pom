@@ -1,12 +1,16 @@
-package rest.controller;
+package dev.aj.rest.controller;
 
-import rest.exception_handlers.StudentOrGradeErrorResponse;
-import rest.exception_handlers.StudentOrGradeNotFoundException;
-import rest.model.CollegeStudent;
-import rest.model.enums.GradeType;
-import rest.service.StudentService;
+import dev.aj.rest.exception_handlers.StudentOrGradeErrorResponse;
+import dev.aj.rest.exception_handlers.StudentOrGradeNotFoundException;
+import dev.aj.rest.model.CollegeStudent;
+import dev.aj.rest.model.enums.GradeType;
+import dev.aj.rest.service.StudentService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
@@ -17,7 +21,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,7 +32,7 @@ public class GradeBookController {
     public static final String UNABLE_TO_FIND_STUDENT_INFORMATION = "Unable to find Student Information for id: %s";
     private final StudentService studentService;
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping(path = "/student")
     public List<CollegeStudent> getStudents() {
         return studentService.getGradebook();
     }
@@ -45,20 +48,25 @@ public class GradeBookController {
         return studentService.studentInformation(id);
     }
 
-    @PostMapping
-    public CollegeStudent createStudent(@RequestBody CollegeStudent student) { // Spring will ensure that 'params' are mapped to 'student'
+    @PostMapping("/student")
+    public CollegeStudent createStudent(@RequestBody CollegeStudent student, HttpServletRequest request, HttpServletResponse response) { // Spring will ensure that 'params' are mapped to 'student'
+
+        String string = request.getHeader("X-Authorisation-User");
+
+        response.addHeader("X-Authorisation-User", string + " Response");
 
         return studentService.createStudent(student);
     }
 
-    @DeleteMapping(path = "/{id}")
-    public void deleteStudent(@PathVariable Long id) {
+    @DeleteMapping(path = "/student/{id}")
+    public void deleteStudent(@PathVariable Long id, HttpServletResponse response) {
 
         if (!studentService.checkIfStudentExistsById(id)) {
             throw new StudentOrGradeNotFoundException(
                     String.format(UNABLE_TO_FIND_STUDENT_INFORMATION, id));
         } else {
             studentService.deleteStudentById(id);
+            response.addHeader("X-Deleted-Student", String.valueOf(id));
         }
     }
 

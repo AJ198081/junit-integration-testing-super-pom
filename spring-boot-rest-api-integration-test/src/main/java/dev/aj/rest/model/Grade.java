@@ -1,4 +1,4 @@
-package rest.model;
+package dev.aj.rest.model;
 
 public interface Grade {
     double getGrade();

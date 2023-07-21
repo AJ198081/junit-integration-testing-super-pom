@@ -1,6 +1,6 @@
-package rest.repository;
+package dev.aj.rest.repository;
 
-import rest.model.CollegeStudent;
+import dev.aj.rest.model.CollegeStudent;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

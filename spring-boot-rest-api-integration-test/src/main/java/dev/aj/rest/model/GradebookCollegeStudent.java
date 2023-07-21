@@ -1,4 +1,4 @@
-package rest.model;
+package dev.aj.rest.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

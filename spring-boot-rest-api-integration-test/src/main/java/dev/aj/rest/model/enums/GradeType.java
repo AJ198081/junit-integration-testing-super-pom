@@ -1,4 +1,4 @@
-package rest.model.enums;
+package dev.aj.rest.model.enums;
 
 public enum GradeType {
     MATH, SCIENCE, HISTORY

@@ -1,4 +1,4 @@
-package rest.service;
+package dev.aj.rest.service;
 
 import org.springframework.stereotype.Service;
 

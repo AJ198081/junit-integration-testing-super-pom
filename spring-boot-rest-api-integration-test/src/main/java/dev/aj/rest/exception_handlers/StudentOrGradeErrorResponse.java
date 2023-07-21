@@ -1,4 +1,4 @@
-package rest.exception_handlers;
+package dev.aj.rest.exception_handlers;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
