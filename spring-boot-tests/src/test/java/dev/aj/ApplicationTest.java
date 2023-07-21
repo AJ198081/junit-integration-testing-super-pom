@@ -1,8 +1,10 @@
 package dev.aj;
 
+import dev.aj.dao.ApplicationDao;
 import dev.aj.model.CollegeStudent;
 import dev.aj.model.Student;
 import dev.aj.model.StudentGrades;
+import dev.aj.service.ApplicationService;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 
 
@@ -29,6 +32,12 @@ class ApplicationTest {
 
     @Autowired
     ApplicationContext applicationContext;
+
+    @MockBean
+    private ApplicationDao applicationDao;
+
+    @MockBean
+    private ApplicationService applicationService;
 
     @Value("${server.port}")
     private String port;
