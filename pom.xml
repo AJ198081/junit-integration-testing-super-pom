@@ -22,6 +22,7 @@
         <module>tdd</module>
         <module>spring-boot-rest-api-integration-test</module>
         <module>brewery</module>
+        <module>multicurrency-tdd</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -111,12 +112,12 @@
                 </configuration>
             </plugin>
 
-            <!-- Need surefire plugin to ensure Maven can pick up unit tests during 'test' phase -->
+            <!--Need surefire plugin to ensure Maven can pick up unit tests during 'test' phase -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!--                    Generate the surefire report regardless of failed tests-->
+                    <!--Generate the surefire report regardless of failed tests-->
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
             </plugin>
@@ -126,10 +127,10 @@
                 <artifactId>maven-surefire-report-plugin</artifactId>
                 <executions>
                     <execution>
-                        <!--                        During test phase-->
+                        <!--During test phase-->
                         <phase>test</phase>
                         <goals>
-                            <!--                            Run the 'report' goal-->
+                            <!--Run the 'report' goal-->
                             <goal>report</goal>
                         </goals>
                     </execution>
