@@ -1,5 +1,6 @@
 package dev.aj.domain.model;
 
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -7,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 public class Franc extends Money{
 
-    public Franc(double amount) {
+    public Franc(BigDecimal amount) {
         super(amount, Currency.FRANC);
     }
 

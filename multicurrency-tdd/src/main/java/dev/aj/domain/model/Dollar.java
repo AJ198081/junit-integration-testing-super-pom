@@ -1,5 +1,6 @@
 package dev.aj.domain.model;
 
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -7,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Dollar extends Money {
 
-    public Dollar(double amount) {
+    public Dollar(BigDecimal amount) {
         super(amount, Currency.DOLLAR);
     }
 }

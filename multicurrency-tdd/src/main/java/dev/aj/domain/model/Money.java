@@ -1,6 +1,7 @@
 package dev.aj.domain.model;
 
 import jakarta.validation.constraints.PositiveOrZero;
+import java.math.BigDecimal;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,23 +19,26 @@ import lombok.ToString;
 public class Money {
 
     @PositiveOrZero
-    protected double amount;
+    protected BigDecimal amount;
     protected Currency currency;
 
-    public static Dollar getDollar(double amount) {
+    public static Dollar getDollar(BigDecimal amount) {
         return new Dollar(amount);
     }
 
-    public static Franc getFranc(double amount) {
+    public static Franc getFranc(BigDecimal amount) {
         return new Franc(amount);
     }
 
-    public Money times(double multiplier) {
-        this.amount *= multiplier;
-        return this;
+    public Money times(BigDecimal multiplier) {
+      return Money.builder()
+             .currency(this.getCurrency())
+             .amount(this.getAmount()
+                         .multiply(multiplier))
+             .build();
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return this.amount;
     }
 
@@ -43,7 +47,7 @@ public class Money {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
         Money money = (Money) o;
-        return amount == money.amount;
+        return amount.equals(money.amount);
     }
 
     @Override

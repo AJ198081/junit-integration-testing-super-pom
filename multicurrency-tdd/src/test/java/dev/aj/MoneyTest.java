@@ -5,6 +5,7 @@ import dev.aj.domain.model.Franc;
 import dev.aj.domain.model.Money;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import java.math.BigDecimal;
 import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -50,7 +51,7 @@ class MoneyTest {
             "5, 5",
             "69, 69"
     })
-    void Test_Money_Equality(int amountOne, int amountTwo) {
+    void Test_Money_Equality(BigDecimal amountOne, BigDecimal amountTwo) {
         Money fiveMoney = new Money(amountOne, Currency.DOLLAR);
         Money moneyFive = new Money(amountTwo, Currency.DOLLAR);
 
@@ -61,7 +62,7 @@ class MoneyTest {
     @CsvSource({
             "1, 1",
     })
-    void Test_Non_Equality_Of_Dollar_And_Franc(int dollarAmount, int francAmount) {
+    void Test_Non_Equality_Of_Dollar_And_Franc(BigDecimal dollarAmount, BigDecimal francAmount) {
         Assertions.assertNotEquals(Money.getDollar(dollarAmount).getCurrency(), Money.getFranc(francAmount).getCurrency());
         Assertions.assertEquals(Money.getDollar(dollarAmount)
                                      .getAmount(), new Franc(francAmount).getAmount());
@@ -69,7 +70,7 @@ class MoneyTest {
 
     @Test
     void testNonNegativeAmounts() {
-        Set<ConstraintViolation<Money>> violations = validator.validate(new Money(-1, Currency.DOLLAR));
+        Set<ConstraintViolation<Money>> violations = validator.validate(new Money(new BigDecimal(-1), Currency.DOLLAR));
         violations.forEach(System.out::println);
         // We aren't using any framework to bring the beans into context,
         // Remember the annotations themselves don't do anything, it is the framework that will process and execute them
@@ -83,10 +84,10 @@ class MoneyTest {
             "45, 10, 450",
             "1, 1, 1",
     })
-    void testMultiplication(int amount, int multiplier, int multipliedAmount) {
-        Money fiveMoney = new Money(amount, Currency.FRANC);
-        Money tenMoney = (Money) fiveMoney.times(multiplier);
-        Assertions.assertEquals(multipliedAmount, tenMoney.getAmount());
+    void testMultiplication(BigDecimal amount, BigDecimal multiplier, BigDecimal multipliedAmount) {
+        Money initialMoney = new Money(amount, Currency.FRANC);
+        Money convertedMoney = initialMoney.times(multiplier);
+        Assertions.assertEquals(multipliedAmount, convertedMoney.getAmount());
     }
 
     @ParameterizedTest(name = "When passed amount: {0} and currency: {2}, we get {1}{0}")
@@ -97,7 +98,7 @@ class MoneyTest {
             "15, chf, franc",
     })
     @Order(1)
-    void Test_Currency_Symbols_And_Amounts(int amount, String currency, String currencyName) {
+    void Test_Currency_Symbols_And_Amounts(BigDecimal amount, String currency, String currencyName) {
 
         Money money = new Money(amount, Currency.getByName(currencyName));
 
