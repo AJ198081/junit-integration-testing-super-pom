@@ -1,0 +1,21 @@
+= JUnit - Super Choice for Testing
+
+=== Points To be discussed -- Memory Jogger
+
+* Run multi-currency-tdd/BankTest,
+** Can you guess what does Bank class do, purely looking at test runs?
+* This repo, suggestion, use/refer if you like, ain't no guide
+* Black box Vs White box
+** Focus - functional vs implementation/code
+* Unit Vs Integration
+** Examples throughout the demo
+* Project setup
+** Plugins, Dependencies (Junit5 and Vintage-Engine)
+* https://github.com/junit-team/junit5[Junit5] General setup for readability
+* Assertions
+** JUnit Jupiter, Hamcrest, AssertJ
+* Tags
+    ** Run mvn clean test
+    ** Then run for a certain tag only, -Dgroups='unit'
+* Parameterized Tests
+** Sources of 'parameters' to tests

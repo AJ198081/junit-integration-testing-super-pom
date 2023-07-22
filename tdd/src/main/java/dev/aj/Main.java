@@ -18,4 +18,9 @@ public class Main {
     public void computeAndPrint(int input) {
         System.out.println(compute(input));
     }
+
+    public static void main(String[] args) {
+        Main mainObject = new Main();
+        mainObject.compute(23);
+    }
 }

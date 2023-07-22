@@ -1,20 +1,13 @@
 package dev.aj.domain.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Data
+@Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class Dollar {
+public class Dollar extends Money {
 
-    private int amount;
-
-    public Dollar times(int multiplier) {
-        this.amount *= multiplier;
-        return this;
+    public Dollar(double amount) {
+        super(amount, Currency.DOLLAR);
     }
 }
