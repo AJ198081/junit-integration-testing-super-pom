@@ -21,6 +21,7 @@
         <module>spring-boot-unit-integration-testing</module>
         <module>tdd</module>
         <module>spring-boot-rest-api-integration-test</module>
+        <module>brewery</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -40,6 +41,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
@@ -59,6 +61,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <version>3.1.0</version>
         </dependency>
     </dependencies>
 
