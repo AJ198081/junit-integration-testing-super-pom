@@ -7,6 +7,9 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,6 +18,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static jakarta.validation.Validation.buildDefaultValidatorFactory;
 
 @Tag(value = "unit")
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class FrancTest {
 
     private Validator validator;
@@ -42,8 +46,8 @@ class FrancTest {
         Assertions.assertEquals(fiveFranc, francFive);
     }
 
-    @Test
-    void testNonNegativeAmounts() {
+    @RepeatedTest(value = 5, name = RepeatedTest.DISPLAY_NAME_PLACEHOLDER + " Test: " + RepeatedTest.CURRENT_REPETITION_PLACEHOLDER + " of " + RepeatedTest.TOTAL_REPETITIONS_PLACEHOLDER)
+    void Test_Non_Negative_Amounts() {
         Set<ConstraintViolation<Franc>> violations = validator.validate(new Franc(new BigDecimal(-1)));
         violations.forEach(System.out::println);
         // We aren't using any framework to bring the beans into context,

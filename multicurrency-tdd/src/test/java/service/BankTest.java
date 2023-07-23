@@ -104,7 +104,7 @@ class BankTest {
         Assertions.assertEquals(convertedMoney, bank.currencyConversion(money, convertedCurrency));
     }
 
-    @ParameterizedTest(name = "Given conversion rate " + DYNAMIC_CONVERSION_RATE + ", Converting {0} {1} to {2} will fetch us {3} {2}")
+    @ParameterizedTest(name = "Given $ to Franc rate of " + DYNAMIC_CONVERSION_RATE + ", Converting {0} {1} to {2} will fetch us {3} {2}")
     @MethodSource(value = "getCurrencyConversionTestingParameters")
     void Test_Customisable_Currency_Conversion(BigDecimal amount, Currency fromCurrency, Currency toCurrency, BigDecimal expectedAmount) {
 

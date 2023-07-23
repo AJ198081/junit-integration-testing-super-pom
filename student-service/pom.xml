@@ -9,7 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>spring-boot-rest-api-integration-test</artifactId>
+    <artifactId>student-service</artifactId>
 
     <dependencies>
         <dependency>
@@ -17,12 +17,11 @@
             <artifactId>h2</artifactId>
         </dependency>
 
-        <dependency>
+        <!--<dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>42.2.2</version>
-        </dependency>
-
+        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -30,5 +29,4 @@
         </dependency>
 
     </dependencies>
-
 </project>

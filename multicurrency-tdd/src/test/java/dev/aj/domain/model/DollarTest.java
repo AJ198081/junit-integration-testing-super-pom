@@ -7,8 +7,10 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepetitionInfo;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -45,9 +47,10 @@ class DollarTest {
     }
 
     @Test
-    void testNonNegativeAmounts() {
+    void testNonNegativeAmounts(TestInfo testInfo) {
         Set<ConstraintViolation<Dollar>> violations = validator.validate(Money.getDollar(new BigDecimal(-1)));
         violations.forEach(System.out::println);
+        System.out.println("TEST Info: -> " + testInfo);
         // We aren't using any framework to bring the beans into context,
         // Remember the annotations themselves don't do anything, it is the framework that will process and execute them
         Assertions.assertEquals(1, violations.size());

@@ -23,6 +23,7 @@
         <module>spring-boot-rest-api-integration-test</module>
         <module>brewery</module>
         <module>multicurrency-tdd</module>
+        <module>student-service</module>
     </modules>
 
     <packaging>pom</packaging>
@@ -128,9 +129,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!--<properties>
-                        <excludeTags>unit</excludeTags>
-                    </properties>-->
+                    <groups>unit</groups>
+                    <excludedGroups>integration</excludedGroups>
                     <!--Generate the surefire report regardless of failed tests-->
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
