@@ -9,6 +9,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
+    @Override
+    Optional<Student> findById(Long id);
+
     @Query("select s from Student s where s.email = ?1")
     Optional<Student> getStudentsByEmail(String email);
 
