@@ -13,8 +13,11 @@
     <artifactId>junit-integration-testing-super-pom</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
+    <packaging>pom</packaging>
+
     <name>junit-integration-testing-super-pom</name>
     <description>testing-sandbox</description>
+
     <modules>
         <module>junit-test</module>
         <module>spring-boot-tests</module>
@@ -25,8 +28,6 @@
         <module>multicurrency-tdd</module>
         <module>student-service</module>
     </modules>
-
-    <packaging>pom</packaging>
 
     <properties>
         <maven.compiler.source>19</maven.compiler.source>
