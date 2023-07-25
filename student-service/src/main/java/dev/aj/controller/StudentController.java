@@ -4,7 +4,6 @@ import dev.aj.domain.model.Student;
 import dev.aj.exceptionHandlers.StudentNotFoundException;
 import dev.aj.service.StudentService;
 import jakarta.validation.Valid;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,6 +47,4 @@ public class StudentController {
         updatedStudent.setEmail(student.getEmail());
         return new ResponseEntity<>(updatedStudent, HttpStatus.OK);
     }
-
-
 }

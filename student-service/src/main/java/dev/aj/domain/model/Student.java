@@ -28,5 +28,4 @@ public class Student {
 
     private boolean active;
     private double grade;
-
 }

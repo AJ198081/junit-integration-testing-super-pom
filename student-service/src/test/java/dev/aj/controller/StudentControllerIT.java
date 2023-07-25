@@ -24,11 +24,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 class StudentControllerIT {
 
+    public static final String EMAIL = "abg@hotmail.com";
     private static final String FIRST_NAME = "AJ";
     private static final String LAST_NAME = "B";
     private static final double GRADES = 80.0;
-    public static final String EMAIL = "abg@hotmail.com";
-
     private Student student;
 
     @Autowired
@@ -61,8 +60,6 @@ class StudentControllerIT {
                                  .findFirst()
                                  .orElseThrow(() -> new NoSuchElementException("No student found!!"));
 
-//        student.setId(studentId);
-
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.put("/students/{id}", studentId)
                                                                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                                                                     .content(objectMapper.writeValueAsString(student)))
@@ -77,7 +74,5 @@ class StudentControllerIT {
                 objectMapper.readValue(mvcResult.getResponse()
                                                 .getContentAsString(), Student.class)
                             .getEmail());
-
-
     }
 }

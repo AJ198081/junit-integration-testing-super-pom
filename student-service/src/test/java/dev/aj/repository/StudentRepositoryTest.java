@@ -114,6 +114,4 @@ class StudentRepositoryTest {
         Assertions.assertThat(averageGrades)
                   .isEqualTo(90.0);
     }
-
-
 }
