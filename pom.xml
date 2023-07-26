@@ -130,8 +130,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <groups>unit</groups>
-                    <excludedGroups>integration</excludedGroups>
+            <!--https://maven.apache.org/surefire/maven-surefire-plugin/examples/junit-platform.html -->
+                <!-- <groups>integration</groups>-->
+                <!-- -Dgroups=integration, will only run test tagged, no untagged, no other tags-->
+                <!-- <excludedGroups>integration</excludedGroups>-->
+                <!-- -DexcludedGroups=integration, will run everything tagged or not, but this tag -->
                     <!--Generate the surefire report regardless of failed tests-->
                     <testFailureIgnore>true</testFailureIgnore>
                 </configuration>

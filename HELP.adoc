@@ -18,7 +18,7 @@
 *** Consistent Project Structure
 **** public vs protected vs private access modifier
 **** IDE support for future (Ctrl Shift T - test classes)
-* Integration Test - Slow - order is ->
+* Integration Test - Slow - types ->
 ** @SpringBootTest
 ** @WebMvcTest / @AutoConfigureWebMvc
 ** @DataJpaTest
@@ -34,13 +34,14 @@
 * Which tests to run?
 ** Class/Method level https://junit.org/junit5/docs/current/user-guide/#running-tests-tags[Tags]
     *** Run mvn clean test
-    *** Then run for a certain tag only, -Dgroups='unit'
+    *** Then run for a certain tag only, -Dgroups='unit' -DexcludedGroups=integration
 ** Method level annotations based on env/properties
     *** junit-test module / demo
 * https://junit.org/junit5/docs/current/user-guide/#writing-tests-parameterized-tests[Parameterized Tests]
 ** Repeated Vs Parameterised
 ** Sources of 'parameters' to tests
 *** CSV, Value, Enum, Method, Null
+* Running tests on 'private' methods - ReflectionTestUtils
 * Fancy things not covered
 ** Nested tests, Instead of a @Test, you can have a @Nested
 *** Class have its own lifecycle, before each/after each.

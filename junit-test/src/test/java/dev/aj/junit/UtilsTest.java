@@ -73,7 +73,7 @@ class UtilsTest {
 
     @Test
     @DisplayName("Test addition feature in support for JIRA #EPRT-17480")
-    void TEST_TWO_AND_THREE_RETURNS_FIVE() {
+    void Test_Two_And_Three_Returns_Five() {
         double sumOfTwoAndThree = util.addTwoNumbers(2, 3);
 
         // Try providing the supplier of String, which is lazily fetched rather than a String, which is always calculated,
@@ -81,7 +81,7 @@ class UtilsTest {
     }
 
     @Test
-    void TEST_NOT_NULL_STRING_RETURNS_FALSE() {
+    void Test_Not_Null_String_Returns_False() {
         boolean checkedForNull = util.checkForNull(STRING_THAT_IS_NOT_NULL);
 
         assertEquals(false, checkedForNull,

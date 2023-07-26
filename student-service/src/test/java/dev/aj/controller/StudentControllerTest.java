@@ -17,7 +17,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 //Doesn't bring into context any 'Service', 'Repository' or 'Component', whatever is necessary for 'Controller', Jackson - yes.
-@WebMvcTest
+@WebMvcTest(controllers = {StudentController.class})
 class StudentControllerTest {
 
     private static final String FIRST_NAME = "AJ";

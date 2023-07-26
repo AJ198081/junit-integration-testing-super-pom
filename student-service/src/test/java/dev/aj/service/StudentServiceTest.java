@@ -88,8 +88,6 @@ class StudentServiceTest {
 
         Assertions.assertThat(longCaptor.getValue())
                   .isEqualTo(student.getId());
-
-
     }
 
     @DisplayName("EPRT-17171 Intermediary errors are saved during pre-submission validation process")
