@@ -16,11 +16,13 @@
 * Project setup
 ** Plugins, Dependencies (Junit5 and Vintage-Engine)
 *** Consistent Project Structure
+*** Dependency Injections (Setter vs Constructor)
 **** public vs protected vs private access modifier
 **** IDE support for future (Ctrl Shift T - test classes)
 * Integration Test - Slow - types ->
 ** @SpringBootTest
 ** @WebMvcTest / @AutoConfigureWebMvc
+*** _Can help verify Constraint Violations_
 ** @DataJpaTest
 ** @SpringBootTest(webEnvironment = NONE)
 ** _Can be good for debugging/understanding code base_
