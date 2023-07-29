@@ -2,10 +2,11 @@ package dev.aj.service;
 
 import dev.aj.domain.model.User;
 
-public interface UserService {
+import java.util.UUID;
 
-    void createUser();
+public interface UserService {
 
     User createUser(String firstName, String lastName, String email, String password, String repeatedPassword);
 
+    User findUserById(UUID userId);
 }
