@@ -17,13 +17,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.UUID;
 
 @WebMvcTest(controllers = {UserController.class})
 @AutoConfigureMockMvc(addFilters = false) // What do you reckon will happen if we comment this?
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-//@RequiredArgsConstructor
 class UserControllerTest {
 
     public static final String FIRST_NAME = "Ajs";
@@ -47,7 +47,6 @@ class UserControllerTest {
     @AfterEach
     void tearDown() {
     }
-
 
     // You can make it a parameterizedTest to test the 'validations' on Dto/Entity class
     @Test
@@ -83,11 +82,37 @@ class UserControllerTest {
         Assertions.assertThat(userRestDto)
                 .extracting("firstName", "lastName", "email", "userId")
                 .contains(FIRST_NAME, LAST_NAME, EMAIL, randomUUID);
-
-        System.out.println(userRestDto);
     }
 
-    @Test
-    void getUsers() {
-    }
+     @Test
+    void Test_Create_User_Returns_400_When_In_Valid_User_Details_Provided() throws Exception {
+
+        String randomUUID = UUID.randomUUID().toString();
+
+        Mockito.when(userService.createUser(Mockito.any(UserDto.class))).then(invocation -> {
+            UserDto userDtoToBeSaved = invocation.getArgument(0, UserDto.class);
+            userDtoToBeSaved.setUserId(randomUUID);
+            return userDtoToBeSaved;
+        });
+
+        UserDetailsDto userDetailsDto = UserDetailsDto.builder()
+                .firstName("A")
+                .lastName(LAST_NAME)
+                .email(EMAIL)
+                .password(PASSWORD)
+                .repeatPassword(PASSWORD)
+                .build();
+
+         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/users")
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .accept(MediaType.APPLICATION_JSON)
+                         .content(objectMapper.writeValueAsString(userDetailsDto)))
+                 .andExpect(MockMvcResultMatchers.status().is4xxClientError())
+                 .andReturn();
+
+         Assertions.assertThat(mvcResult)
+                 .extracting(MvcResult::getResolvedException)
+                 .extracting(Object::getClass)
+                 .isEqualTo(MethodArgumentNotValidException.class);
+     }
 }

@@ -18,7 +18,6 @@ public class UserDetailsDto {
     @Size(min = 2, message = "Last name must not be less than 2 characters")
     private String lastName;
 
-
     private String email;
 
     @Size(min = 8, max = 16, message = "Password must be equal to or greater than 8 characters and less than 16 characters")
