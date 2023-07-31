@@ -20,7 +20,7 @@
 **** public vs protected vs private access modifier
 **** IDE support for future (Ctrl Shift T - test classes)
 * Integration Test - Slow - types ->
-** @SpringBootTest
+** @SpringBootTest - Full context
 ** @WebMvcTest / @AutoConfigureWebMvc
 *** _Can help verify Constraint Violations_
 ** @DataJpaTest
@@ -39,6 +39,7 @@
     *** Then run for a certain tag only, -Dgroups='unit' -DexcludedGroups=integration
 ** Method level annotations based on env/properties
     *** junit-test module / demo
+** How others do it? e.g. 'jjwt' - reactor pom
 * https://junit.org/junit5/docs/current/user-guide/#writing-tests-parameterized-tests[Parameterized Tests]
 ** Repeated Vs Parameterised
 ** Sources of 'parameters' to tests
