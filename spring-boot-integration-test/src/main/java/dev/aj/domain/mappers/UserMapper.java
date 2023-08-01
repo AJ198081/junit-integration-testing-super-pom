@@ -5,7 +5,6 @@ import dev.aj.domain.dtos.UserDto;
 import dev.aj.domain.dtos.UserRestDto;
 import dev.aj.domain.model.User;
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
 import org.mapstruct.factory.Mappers;
 
 import java.util.List;
@@ -27,6 +26,7 @@ public interface UserMapper {
 
     UserDto userToUserDto(User user);
 
+    List<UserDto> usersToUserDtos(List<User> users);
 
     List<UserRestDto> userDtosToUserRestDtos(List<UserDto> users);
 }

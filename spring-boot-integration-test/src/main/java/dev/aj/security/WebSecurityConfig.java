@@ -2,6 +2,7 @@ package dev.aj.security;
 
 import dev.aj.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
 
     private final UserRepository userRepository;
+    private final ApplicationContext applicationContext;
 
     @Bean
     public SecurityFilterChain configure(HttpSecurity httpSecurity) throws Exception {
@@ -47,7 +49,7 @@ public class WebSecurityConfig {
     }
 
     protected AuthenticationFilter getAuthenticationFilter(AuthenticationManager authenticationManager) {
-        final AuthenticationFilter filter = new AuthenticationFilter(authenticationManager);
+        final AuthenticationFilter filter = new AuthenticationFilter(authenticationManager, applicationContext);
         filter.setFilterProcessesUrl("/users/login");
         return filter;
     }

@@ -26,23 +26,22 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
+@RequiredArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-    private final AuthenticationManager authenticationManager;
-    private ApplicationContext applicationContext;
 
-    public AuthenticationFilter(AuthenticationManager authenticationManager) {
-        this.authenticationManager = authenticationManager;
-    }
+    private final AuthenticationManager authenticationManager;
+    private final ApplicationContext applicationContext;
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest req,
-                                                HttpServletResponse res) throws AuthenticationException {
+    public Authentication attemptAuthentication(HttpServletRequest request,
+                                                HttpServletResponse response) throws AuthenticationException {
         try {
-            byte[] inputStreamBytes = StreamUtils.copyToByteArray(req.getInputStream());
-            Map<String, String> jsonRequest = new ObjectMapper().readValue(inputStreamBytes, Map.class);
 
-//            UserLoginRequestModel creds = new ObjectMapper()
-//                    .readValue(jsonRequest.get("body"), UserLoginRequestModel.class);
+            byte[] inputStreamBytes = StreamUtils.copyToByteArray(request.getInputStream());
+
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            Map<String, String> jsonRequest = objectMapper.readValue(inputStreamBytes, Map.class);
 
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -57,23 +56,24 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     }
 
     @Override
-    protected void successfulAuthentication(HttpServletRequest req,
-                                            HttpServletResponse res,
-                                            FilterChain chain,
-                                            Authentication auth) throws IOException, ServletException {
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain filterChain,
+                                            Authentication authentication) throws IOException, ServletException {
 
-        String userName = ((UserDetails) auth.getPrincipal()).getUsername();
+        String userName = ((UserDetails) authentication.getPrincipal()).getUsername();
 
         String token = Jwts.builder()
                 .setSubject(userName)
                 .setExpiration(new Date(System.currentTimeMillis() + 864000000L))
                 .signWith(SignatureAlgorithm.HS512, SecurityConstants.TOKEN_SECRET)
                 .compact();
+
         UserService userService = (UserService) applicationContext.getBean("userService");
+
         UserDto userDto = userService.getUser(userName);
 
-        res.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
-        res.addHeader("UserID", userDto.getUserId());
-
+        response.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
+        response.addHeader(SecurityConstants.USER_ID, userDto.getUserId());
     }
 }

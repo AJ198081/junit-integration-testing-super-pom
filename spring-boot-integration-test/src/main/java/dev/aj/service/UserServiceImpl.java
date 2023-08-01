@@ -1,16 +1,19 @@
 package dev.aj.service;
 
+import dev.aj.domain.dtos.UserDto;
 import dev.aj.domain.mappers.UserMapper;
 import dev.aj.domain.model.User;
 import dev.aj.exceptions.UsersServiceException;
 import dev.aj.repository.UserRepository;
-import dev.aj.domain.dtos.UserDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,16 +43,57 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUsers(int page, int limit) {
-        return null;
+        return mapper.usersToUserDtos(userRepository.findAll());
     }
 
     @Override
     public UserDto getUser(String email) {
-        return null;
+
+        User user = userRepository.findByUserId(email).orElseThrow(() -> new UsersServiceException("Unable to find user with email " + email));
+        return mapper.userToUserDto(user);
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new UsersServiceException("Unable to find user with name " + username));
+
+        return new UserDetails() {
+
+            @Override
+            public Collection<? extends GrantedAuthority> getAuthorities() {
+                return null;
+            }
+
+            @Override
+            public String getPassword() {
+                return user.getEncryptedPassword();
+            }
+
+            @Override
+            public String getUsername() {
+                return user.getUserId();
+            }
+
+            @Override
+            public boolean isAccountNonExpired() {
+                return true;
+            }
+
+            @Override
+            public boolean isAccountNonLocked() {
+                return true;
+            }
+
+            @Override
+            public boolean isCredentialsNonExpired() {
+                return true;
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return true;
+            }
+        };
     }
 }

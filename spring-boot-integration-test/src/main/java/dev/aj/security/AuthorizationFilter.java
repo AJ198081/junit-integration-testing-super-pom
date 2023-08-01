@@ -6,6 +6,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,11 +17,12 @@ import java.io.IOException;
 
 //@Component
 public class AuthorizationFilter extends BasicAuthenticationFilter {
+
    private final UserRepository userRepository;
 
-    public AuthorizationFilter(AuthenticationManager authManager,
+    public AuthorizationFilter(AuthenticationManager authenticationManager,
                                UserRepository userRepository) {
-        super(authManager);
+        super(authenticationManager);
         this.userRepository = userRepository;
     }
 
@@ -42,23 +44,21 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-        String token = request.getHeader(SecurityConstants.HEADER_STRING);
+        String tokenHeader = request.getHeader(SecurityConstants.HEADER_STRING);
 
-        if (token != null) {
+        if (tokenHeader != null) {
 
-            token = token.replace(SecurityConstants.TOKEN_PREFIX, "");
+            String token = tokenHeader.replace(SecurityConstants.TOKEN_PREFIX, "");
 
             String user = Jwts.parser()
                     .setSigningKey( SecurityConstants.TOKEN_SECRET)
-                    .parseClaimsJws( token )
+                    .parseClaimsJws(token)
                     .getBody()
                     .getSubject();
 
             if (user != null) {
                 return new UsernamePasswordAuthenticationToken(user, null, null);
-            }
-
-            return null;
+            } else return null;
         }
 
         return null;
